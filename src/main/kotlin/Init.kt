@@ -1,22 +1,15 @@
-import com.gargoylesoftware.htmlunit.WebClient
-import com.gargoylesoftware.htmlunit.html.HtmlElement
-import com.gargoylesoftware.htmlunit.html.HtmlPage
+import org.telegram.telegrambots.ApiContextInitializer
+import org.telegram.telegrambots.TelegramBotsApi
+import org.telegram.telegrambots.exceptions.TelegramApiException
 
 fun main(args: Array<String>) {
-    /*ApiContextInitializer.init();
-    val telegramBotApi: TelegramBotsApi = TelegramBotsApi()
+    ApiContextInitializer.init();
+    val telegramBotApi = TelegramBotsApi()
+    val ltVisaBot = LTVisaBot()
     try {
-        telegramBotApi.registerBot(LTVisaBot())
+        telegramBotApi.registerBot(ltVisaBot)
     } catch (e: TelegramApiException) {
         e.printStackTrace()
-    }*/
-    val client: WebClient = WebClient();
-    var url: String = "https://evas2.urm.lt/visit/"
-    var page: HtmlPage = client.getPage<HtmlPage>(url)
-    val el:HtmlElement = page.body.getElementsByTagName("a")
-            .filter { tg -> tg.getAttribute("href").contains("rct77") }
-            .last()
-    println(el);
-    page = client.getPage(url+el.getAttribute("href"));
-
+    }
+    Checker().startChecks(ltVisaBot::alertAll)
 }

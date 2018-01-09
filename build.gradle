@@ -2,6 +2,7 @@ buildscript {
     ext.kotlin_version = '1.2.0'
 
     repositories {
+        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -15,14 +16,17 @@ version '1.0-SNAPSHOT'
 apply plugin: 'kotlin'
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
 dependencies {
+    compile 'com.beust:klaxon:2.0.5'
+    compile group: 'com.github.shyiko.skedule', name: 'skedule', version: '0.3.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.telegram:telegrambots:3.5"
     compile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.29'
-
+    compile group: 'com.google.http-client', name: 'google-http-client', version: '1.23.0'
 }
 
 compileKotlin {
