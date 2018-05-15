@@ -1,8 +1,15 @@
+import broker.api.Message
+import broker.api.Subscriber
 import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 
-class LTVisaBot: TelegramLongPollingBot() {
+class LTVisaBot: TelegramLongPollingBot(), Subscriber<Map<String, List<String>>> {
+
+    override fun notify(message: Message<Map<String, List<String>>>) {
+        alertAll(message.getVal())
+    }
+
     val currentChats: MutableSet<Long> = HashSet()
     val name: String = "bot.name"
     val token: String = "bot.token"
