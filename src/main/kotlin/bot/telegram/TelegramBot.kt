@@ -1,18 +1,16 @@
-import broker.api.Message
-import broker.api.Subscriber
+package bot.telegram
+
+import Resources
+import messaging.Message
 import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
+import java.util.*
 
-class LTVisaBot: TelegramLongPollingBot(), Subscriber<Map<String, List<String>>> {
-
-    override fun notify(message: Message<Map<String, List<String>>>) {
-        alertAll(message.getVal())
-    }
-
+class TelegramBot: TelegramLongPollingBot() {
     val currentChats: MutableSet<Long> = HashSet()
-    val name: String = "bot.name"
-    val token: String = "bot.token"
+    val botName: String = "telegram.bot.name"
+    val token: String = "telegram.bot.token"
     val resources: Resources = Resources()
 
     override fun getBotToken(): String {
@@ -28,10 +26,11 @@ class LTVisaBot: TelegramLongPollingBot(), Subscriber<Map<String, List<String>>>
     }
 
     override fun getBotUsername(): String {
-        return resources.getResourse(name)
+        return resources.getResourse(botName)
     }
 
-    fun alertAll(dates: Map<String, List<String>>) {
+    fun alertAll(msg: Message) {
+        val dates = msg.dates
         val sb = StringBuilder("Появились даты! \uD83D\uDCC5 \n")
         dates.keys.forEach { key: String -> run {
             sb.append("На дату ").append(key).append(" доступно время: \n")

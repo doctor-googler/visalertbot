@@ -21,12 +21,15 @@ repositories {
 }
 
 dependencies {
-    compile 'com.beust:klaxon:2.0.5'
-    compile group: 'com.github.shyiko.skedule', name: 'skedule', version: '0.3.0'
+    compile "com.beust:klaxon:2.0.5"
+    compile "com.github.shyiko.skedule:skedule:0.3.0"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "net.sourceforge.htmlunit:htmlunit:2.29"
+    compile "com.google.http-client:google-http-client:1.23.0"
     compile "org.telegram:telegrambots:3.5"
-    compile group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.29'
-    compile group: 'com.google.http-client', name: 'google-http-client', version: '1.23.0'
+    compile "com.viber:viber-bot:1.0.11"
+    compile "org.nanohttpd:nanohttpd:2.3.0"
+    compile "org.litote.kmongo:kmongo:3.8.1"
 }
 
 compileKotlin {

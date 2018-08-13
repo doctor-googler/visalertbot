@@ -1,6 +1,5 @@
-package source.impl
+package source.lt
 
-import source.api.Source
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.Klaxon
 import com.gargoylesoftware.htmlunit.WebClient
@@ -10,10 +9,16 @@ import com.google.api.client.http.GenericUrl
 import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.HttpResponse
 import com.google.api.client.http.apache.ApacheHttpTransport
+import consumer.api.IConsumer
+import messaging.Message
+import source.api.ISource
 import java.io.StringReader
 import java.net.URL
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
-class LithuaniaEmbassy : Source<Map<String, List<String>>> {
+class LithuanianEmbassy : ISource {
 
     private val embassyUrl = "https://evas2.urm.lt/visit/"
     private val aHtmlTag = "a"
@@ -21,18 +26,41 @@ class LithuaniaEmbassy : Source<Map<String, List<String>>> {
     private val mysticValue = "rct77"
     private val jsonDatesUrl = "/calendar/json?_d=&_aby=3&_cry=6&_c=1&_t="
     private val jsonTimesUrl = "/calendar/json?_d=%s&_aby=3&_cry=6&_c=1&_t=1"
+    private val consumers: MutableList<IConsumer> = CopyOnWriteArrayList()
+    private var lastInfo: Map<String, List<String>> = HashMap()
+
+    init {
+        ScheduledThreadPoolExecutor(1).scheduleAtFixedRate(this::updateInfo, 0, 60, TimeUnit.SECONDS)
+    }
+
+    override fun registerConsumer(consumer: IConsumer) {
+        this.consumers.add(consumer)
+    }
+
+    override fun unregisterConsumer(consumer: IConsumer) {
+        this.consumers.remove(consumer)
+    }
+
+    override fun getName(): String {
+        return "Литовское посольство"
+    }
 
     override fun info(): Map<String, List<String>> {
-        val baseUrl: URL = mineJsonUrls();
+        return this.lastInfo
+    }
+
+    private fun updateInfo() {
+        val baseUrl: URL = mineJsonUrls()
         val rawDatesJson: String =
                 retrieveXHRJson("${baseUrl.protocol}://${baseUrl.host}$jsonDatesUrl", baseUrl.toString())
-        return parseJsonArray(rawDatesJson)
+        this.lastInfo = parseJsonArray(rawDatesJson)
                 .map {
                     it to parseJsonArray(
                             retrieveXHRJson("${baseUrl.protocol}://${baseUrl.host}${String.format(jsonTimesUrl, it)}",
                                     baseUrl.toString()))
                 }
                 .toMap()
+        consumers.forEach { c -> c.onMessageReceive(Message(this.getName(), this.lastInfo)) }
     }
 
     private fun mineJsonUrls(): URL {
@@ -48,12 +76,12 @@ class LithuaniaEmbassy : Source<Map<String, List<String>>> {
         val datesUrl = GenericUrl(url)
         println(url)
         val jsonRequest: HttpRequest = ApacheHttpTransport()
-                .createRequestFactory({ request: HttpRequest? ->
+                .createRequestFactory { request: HttpRequest? ->
                     run {
                         request?.headers?.set("Referer", refererUrl)
                         request?.headers?.set("X-Requested-With", "XMLHttpRequest")
                     }
-                })
+                }
                 .buildGetRequest(datesUrl)
         val jsonResponse: HttpResponse = jsonRequest.execute()
         val result: String = jsonResponse.parseAsString()
