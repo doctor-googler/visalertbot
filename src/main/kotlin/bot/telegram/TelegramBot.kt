@@ -1,45 +1,43 @@
 package bot.telegram
 
-import Resources
+import init.Resources
 import messaging.Message
-import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
-import java.util.*
 
 class TelegramBot: TelegramLongPollingBot() {
-    val currentChats: MutableSet<Long> = HashSet()
-    val botName: String = "telegram.bot.name"
-    val token: String = "telegram.bot.token"
-    val resources: Resources = Resources()
+    private val botName: String
+    private val token: String
+    private var updateCallBack: ((Update?) -> Unit)? = null
+    private var datesCallback: ((Message) -> Unit)? = null
 
-    override fun getBotToken(): String {
-        return resources.getResourse(token)
+    init {
+        val resources = Resources()
+        token = resources.getResourse("telegram.bot.token")
+        botName = resources.getResourse("telegram.bot.name")
     }
 
-    override fun onUpdateReceived(update: Update?) {
-        var sendMsg: SendMessage = SendMessage()
-                .setChatId(update?.message?.chatId)
-                .setText("Ура! Вы добавлены к списку рассылки! \uD83D\uDE0B")
-        execute(sendMsg)
-        currentChats.add(update?.message?.chatId!!)
+    fun setUpdateCallback(callback: (Update?) -> Unit) {
+        this.updateCallBack = callback
+    }
+
+    override fun getBotToken(): String {
+        return token
     }
 
     override fun getBotUsername(): String {
-        return resources.getResourse(botName)
+        return botName
     }
 
-    fun alertAll(msg: Message) {
-        val dates = msg.dates
-        val sb = StringBuilder("Появились даты! \uD83D\uDCC5 \n")
-        dates.keys.forEach { key: String -> run {
-            sb.append("На дату ").append(key).append(" доступно время: \n")
-            dates[key]?.forEach { time: String ->  sb.append("◾ ").append(time).append("\n")}
-        } }
-        currentChats.forEach { chatId:Long -> run {
-            execute(SendMessage()
-                    .setChatId(chatId)
-                    .setText(sb.toString()))
-        }}
+    override fun onUpdateReceived(update: Update?) {
+        this.updateCallBack?.invoke(update)
+    }
+
+    fun onDatesReceived(callback: (Message) -> Unit) {
+        this.datesCallback = callback
+    }
+
+    fun datesReceived(msg: Message) {
+        this.datesCallback?.invoke(msg)
     }
 }

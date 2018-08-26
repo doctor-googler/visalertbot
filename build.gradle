@@ -4,6 +4,7 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        maven {url "https://jitpack.io"}
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -18,6 +19,7 @@ apply plugin: 'kotlin'
 repositories {
     jcenter()
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
@@ -30,6 +32,7 @@ dependencies {
     compile "com.viber:viber-bot:1.0.11"
     compile "org.nanohttpd:nanohttpd:2.3.0"
     compile "org.litote.kmongo:kmongo:3.8.1"
+    implementation "com.github.dmanchon:ngrok-java-client:0.1-SNAPSHOT"
 }
 
 compileKotlin {
